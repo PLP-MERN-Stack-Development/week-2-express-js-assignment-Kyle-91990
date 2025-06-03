@@ -3,7 +3,10 @@
 // Import required modules
 const express = require('express');
 const bodyParser = require('body-parser');
-const { v4: uuidv4 } = require('uuid');
+const { loggerMiddleware } = require('./middleware/logger');
+const { authMiddleware } = require('./middleware/auth');
+const { errorHandler } = require('./middleware/errorHandler');
+const productsRouter = require('./routes/products');
 
 // Initialize Express app
 const app = express();
@@ -11,6 +14,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware setup
 app.use(bodyParser.json());
+app.use(loggerMiddleware);
+app.use(authMiddleware);
 
 // Sample in-memory products database
 let products = [
@@ -57,10 +62,10 @@ app.get('/api/products', (req, res) => {
   res.json(products);
 });
 
-// TODO: Implement custom middleware for:
-// - Request logging
-// - Authentication
-// - Error handling
+app.use('/api/products', productsRouter);
+
+// Error handling
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, () => {
@@ -68,4 +73,4 @@ app.listen(PORT, () => {
 });
 
 // Export the app for testing purposes
-module.exports = app; 
+module.exports = app;
